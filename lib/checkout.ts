@@ -12,13 +12,18 @@ import { prisma } from "@/lib/prisma";
 // ---------------------------------------------------------------------------
 // 运费 / 税政策（可调参数，改这里即可，不用动业务逻辑）
 // ---------------------------------------------------------------------------
-/** 满 CA$75 全加拿大免邮（与站点头部公告一致），不满按下行统一运费。 */
+/**
+ * 免邮开关：测试阶段关闭——所有订单统一收运费，不设免邮门槛。
+ * 店主确认免邮政策后把这里改成 true 即可（门槛见下行）。
+ */
+export const FREE_SHIPPING_ENABLED = false;
+/** 免邮门槛（开关打开后生效）：满 CA$75 全加拿大免邮。 */
 export const FREE_SHIPPING_THRESHOLD_CENTS = 7500;
-/** 不满免邮门槛时的统一运费 CA$9。 */
+/** 统一运费 CA$9。 */
 export const FLAT_SHIPPING_CENTS = 900;
 /**
- * 税：默认价格含税，结账时不另计。
- * 店主确认 GST/QST 税号与征收方式后，再把税做成按省计算的 line item。
+ * 税：店主无 GST/QST 税号，价格含税，结账时不另计税。
+ * 将来有税号并确认征收方式后，再把税做成按省计算的 line item。
  */
 export const TAX_CENTS = 0;
 
@@ -159,7 +164,10 @@ export async function computeCheckoutTotals(
 
   const subtotalCents = lines.reduce((s, l) => s + l.lineTotalCents, 0);
   const shippingCents =
-    subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS ? 0 : FLAT_SHIPPING_CENTS;
+    FREE_SHIPPING_ENABLED &&
+    subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS
+      ? 0
+      : FLAT_SHIPPING_CENTS;
   const taxCents = TAX_CENTS;
   const totalCents = subtotalCents + shippingCents + taxCents;
 
