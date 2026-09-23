@@ -7,3 +7,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Project notes (my-store)
+
+- Prisma: `npm i prisma` currently resolves to the v8 RC (new platform CLI, no `migrate`/`generate`). This project pins the stable ORM: `prisma@6` / `@prisma/client@6`.
+- npm 10 on this VM sometimes fails with `Cannot read properties of null (reading 'edgesOut')`. Fix: `npm cache clean --force`, retry with `--legacy-peer-deps`.
+- Prisma engine binaries cannot be downloaded directly on this VM (egress proxy blocks direct HTTPS and fetch-engine ignores the proxy). Install with `npm install --ignore-scripts`, then run `bash scripts/setup-prisma-engines.sh` (downloads via proxy, verifies sha256). Local prisma commands need `PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1`. Not needed on Vercel.
+- DB: Neon Postgres. `DATABASE_URL` = pooled connection (app), `DIRECT_URL` = direct connection (migrations). Both live in `.env.local` (gitignored) — never commit real credentials.

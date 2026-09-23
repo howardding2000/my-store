@@ -1,0 +1,193 @@
+// Prisma schema for my-store — small Canadian e-commerce site.
+// Conventions:
+// - Money is stored as integer cents (e.g. CA$19.99 -> 1999), currency CAD.
+// - Product/Category content is bilingual (EN/FR columns).
+// - No separate Payment table in Phase 2: Stripe is the source of truth for
+//   payments; Order keeps stripeSessionId / stripePaymentIntentId. A Payment
+//   ledger can be added later if partial refunds / multi-capture are needed.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users & Auth.js (Phase 5). Auth tables are defined now so Phase 5 needs no
+// schema rewrite; passwordHash supports email+password login, OAuth users
+// leave it null.
+// ---------------------------------------------------------------------------
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  passwordHash  String?
+  role          String    @default("customer") // "customer" | "admin"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  orders    Order[]
+  addresses Address[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+model Category {
+  id       String  @id @default(cuid())
+  slug     String  @unique
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  nameEn String
+  nameFr String
+  descEn String?
+  descFr String?
+  imageUrl String?
+  sortOrder Int @default(0)
+
+  products Product[]
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  nameEn         String
+  nameFr         String
+  descEn         String?  @db.Text
+  descFr         String?  @db.Text
+  priceCents     Int
+  compareAtCents Int?
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id])
+  images         String[]
+  isActive       Boolean  @default(true)
+  isFeatured     Boolean  @default(false)
+  stockQty       Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orderItems    OrderItem[]
+  inventoryLogs InventoryLog[]
+}
+
+model InventoryLog {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  change    Int // positive = restock, negative = sale
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+// ---------------------------------------------------------------------------
+// Orders & Stripe (Phase 7 fills the Stripe fields; tables exist now so the
+// shape is settled early)
+// ---------------------------------------------------------------------------
+model Order {
+  id                  String   @id @default(cuid())
+  orderNumber         String   @unique
+  userId              String?
+  user                User?    @relation(fields: [userId], references: [id])
+  email               String
+  status              String   @default("pending") // pending | paid | fulfilled | cancelled | refunded
+  subtotalCents       Int
+  shippingCents       Int
+  taxCents            Int
+  totalCents          Int
+  currency            String   @default("CAD")
+  stripeSessionId     String?  @unique
+  stripePaymentIntentId String?
+  shippingAddress     Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  items        OrderItem[]
+  stripeEvents StripeEvent[]
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  nameEn         String // snapshot at purchase time
+  nameFr         String
+  unitPriceCents Int // snapshot at purchase time
+  quantity       Int
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String?
+  fullName   String
+  line1      String
+  line2      String?
+  city       String
+  province   String
+  postalCode String
+  country    String  @default("CA")
+  phone      String?
+  isDefault  Boolean @default(false)
+}
+
+// Stripe webhook idempotency: one row per Stripe event id, unique index
+// guarantees a webhook is never processed twice.
+model StripeEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  type      String
+  orderId   String?
+  order     Order?   @relation(fields: [orderId], references: [id])
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
