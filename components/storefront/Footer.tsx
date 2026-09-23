@@ -23,13 +23,13 @@ export default function Footer({
           </p>
           <ul className="mt-3 space-y-2 text-sm">
             <li>
-              <Link href={`${home}#categories`} className="hover:text-white">
-                {dict.nav.categories}
+              <Link href={`${home}/products`} className="hover:text-white">
+                {dict.nav.products}
               </Link>
             </li>
             <li>
-              <Link href={`${home}#featured`} className="hover:text-white">
-                {dict.featured.title}
+              <Link href={`${home}/search`} className="hover:text-white">
+                {dict.nav.search}
               </Link>
             </li>
           </ul>

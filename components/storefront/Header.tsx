@@ -29,11 +29,11 @@ export default function Header({
             <Link href={home} className="hover:text-brand-700">
               {dict.nav.home}
             </Link>
-            <Link href={`${home}#categories`} className="hover:text-brand-700">
-              {dict.nav.categories}
+            <Link href={`${home}/products`} className="hover:text-brand-700">
+              {dict.nav.products}
             </Link>
-            <Link href={`${home}#featured`} className="hover:text-brand-700">
-              {dict.featured.title}
+            <Link href={`${home}/search`} className="hover:text-brand-700">
+              {dict.nav.search}
             </Link>
           </nav>
 
@@ -55,6 +55,16 @@ export default function Header({
                 </Link>
               ))}
             </div>
+
+            {/* 搜索 */}
+            <Link
+              href={`${home}/search`}
+              title={dict.nav.search}
+              aria-label={dict.nav.search}
+              className="p-2 text-stone-500 hover:text-brand-700"
+            >
+              🔍
+            </Link>
 
             {/* 购物车 / 账户：Phase 4、5 实现，这里先占位 */}
             <span

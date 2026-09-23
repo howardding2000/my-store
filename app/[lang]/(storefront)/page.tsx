@@ -1,11 +1,22 @@
 import Link from "next/link";
 import { getDictionary } from "../dictionaries";
-import { formatPrice } from "@/lib/format";
+import {
+  getCategories,
+  getFeaturedProducts,
+  localizedDesc,
+  localizedName,
+} from "@/lib/catalog";
+import ProductCard from "@/components/storefront/ProductCard";
 
-/** 首页：纯静态展示，真实商品数据 Phase 2/3 接入 */
+/** 首页：分类和精选商品从数据库读真实数据 */
 export default async function HomePage() {
   const { dict, locale } = await getDictionary();
   const home = `/${locale}`;
+
+  const [categories, featured] = await Promise.all([
+    getCategories(),
+    getFeaturedProducts(4),
+  ]);
 
   const categoryStyles = [
     "from-brand-600 to-brand-900",
@@ -51,55 +62,39 @@ export default async function HomePage() {
         </h2>
         <p className="mt-1 text-stone-500">{dict.categories.subtitle}</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {dict.categories.items.map((cat, i) => (
-            <div
-              key={cat.name}
-              className={`rounded-2xl p-6 text-white bg-gradient-to-br ${categoryStyles[i % categoryStyles.length]}`}
+          {categories.map((cat, i) => (
+            <Link
+              key={cat.slug}
+              href={`${home}/products?category=${encodeURIComponent(cat.slug)}`}
+              className={`rounded-2xl p-6 text-white bg-gradient-to-br ${categoryStyles[i % categoryStyles.length]} hover:opacity-95`}
             >
-              <h3 className="text-lg font-bold">{cat.name}</h3>
-              <p className="mt-2 text-sm text-white/85">{cat.description}</p>
-            </div>
+              <h3 className="text-lg font-bold">
+                {localizedName(cat, locale)}
+              </h3>
+              <p className="mt-2 text-sm text-white/85">
+                {localizedDesc(cat, locale)}
+              </p>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* 精选商品（静态占位） */}
-      <section id="featured" className="bg-white border-y border-stone-200">
-        <div className="max-w-6xl mx-auto px-4 py-14">
-          <h2 className="text-2xl font-bold text-stone-900">
-            {dict.featured.title}
-          </h2>
-          <p className="mt-1 text-stone-500">{dict.featured.subtitle}</p>
-          <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
-            {dict.featured.products.map((p) => (
-              <div
-                key={p.name}
-                className="rounded-2xl border border-stone-200 overflow-hidden bg-white"
-              >
-                <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-300 flex items-center justify-center">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-stone-500 bg-white/70 rounded-full px-3 py-1">
-                    {p.tag}
-                  </span>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-stone-900 text-sm sm:text-base">
-                    {p.name}
-                  </h3>
-                  <p className="mt-1 text-brand-700 font-bold">
-                    {formatPrice(p.price, locale)}
-                  </p>
-                  <button
-                    type="button"
-                    className="mt-3 w-full rounded-full bg-stone-900 text-white text-sm font-semibold py-2 hover:bg-stone-700"
-                  >
-                    {dict.featured.addToCart}
-                  </button>
-                </div>
-              </div>
-            ))}
+      {/* 精选商品（数据库真实数据） */}
+      {featured.length > 0 && (
+        <section id="featured" className="bg-white border-y border-stone-200">
+          <div className="max-w-6xl mx-auto px-4 py-14">
+            <h2 className="text-2xl font-bold text-stone-900">
+              {dict.featured.title}
+            </h2>
+            <p className="mt-1 text-stone-500">{dict.featured.subtitle}</p>
+            <div className="mt-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
+              {featured.map((p) => (
+                <ProductCard key={p.id} product={p} locale={locale} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 价值主张 */}
       <section className="max-w-6xl mx-auto px-4 py-14">
