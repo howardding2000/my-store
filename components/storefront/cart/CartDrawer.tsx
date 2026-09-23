@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "./CartProvider";
 import { CartLineItem } from "./CartLineItem";
+import { CheckoutButton } from "./CheckoutButton";
 import { getCartStrings } from "./cart-strings";
 import { formatPriceCents } from "@/lib/format";
 
@@ -98,16 +99,11 @@ export function CartDrawer() {
               >
                 {t.viewCart}
               </Link>
-              {/* Phase 5 占位：在线结算还没做，按钮禁用并注明 */}
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                title={t.checkoutSoon}
-                className="flex-1 rounded-full bg-stone-200 text-stone-500 font-semibold py-2.5 cursor-not-allowed"
-              >
-                {t.checkout}
-              </button>
+              {/* 在线结算：跳 Stripe 托管付款页 */}
+              <CheckoutButton
+                locale={locale}
+                className="flex-1 rounded-full bg-brand-700 text-white font-semibold py-2.5 hover:bg-brand-800 transition disabled:opacity-60 disabled:cursor-wait"
+              />
             </div>
             <button
               type="button"

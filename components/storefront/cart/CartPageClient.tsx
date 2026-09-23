@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "./CartProvider";
 import { CartLineItem } from "./CartLineItem";
+import { CheckoutButton } from "./CheckoutButton";
 import { getCartStrings } from "./cart-strings";
 import { formatPriceCents } from "@/lib/format";
 import type { Locale } from "@/app/[lang]/dictionaries";
@@ -70,19 +71,10 @@ export function CartPageClient({ locale }: { locale: Locale }) {
               </span>
             </div>
             <p className="text-xs text-stone-500">{t.note}</p>
-            {/* Phase 5 占位：在线结算还没做 */}
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title={t.checkoutSoon}
-              className="w-full rounded-full bg-stone-200 text-stone-500 font-semibold py-3 cursor-not-allowed"
-            >
-              {t.checkout}
-            </button>
-            <p className="text-xs text-stone-400 text-center">
-              {t.checkoutSoon}
-            </p>
+            <CheckoutButton
+              locale={locale}
+              className="w-full rounded-full bg-brand-700 text-white font-semibold py-3 hover:bg-brand-800 transition disabled:opacity-60 disabled:cursor-wait"
+            />
           </aside>
         </div>
       )}

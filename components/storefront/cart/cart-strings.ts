@@ -21,8 +21,11 @@ const en = {
   continueShopping: "Continue shopping",
   viewCart: "View cart",
   checkout: "Checkout",
-  checkoutSoon:
-    "Online checkout arrives in Phase 5 — this button is a placeholder.",
+  checkoutProcessing: "Processing…",
+  checkoutError:
+    "Could not start checkout. Please check your cart and try again.",
+  stockError:
+    "Some items in your cart don't have enough stock. Please adjust quantities.",
   clearCart: "Clear cart",
   itemCount: (n: number) => `${n} item${n === 1 ? "" : "s"}`,
 };
@@ -43,8 +46,11 @@ const fr: typeof en = {
   continueShopping: "Continuer mes achats",
   viewCart: "Voir le panier",
   checkout: "Commander",
-  checkoutSoon:
-    "Le paiement en ligne arrive à la phase 5 — ce bouton est provisoire.",
+  checkoutProcessing: "Traitement…",
+  checkoutError:
+    "Impossible de démarrer le paiement. Vérifiez votre panier et réessayez.",
+  stockError:
+    "Le stock est insuffisant pour certains articles. Veuillez ajuster les quantités.",
   clearCart: "Vider le panier",
   itemCount: (n: number) => `${n} article${n === 1 ? "" : "s"}`,
 };
