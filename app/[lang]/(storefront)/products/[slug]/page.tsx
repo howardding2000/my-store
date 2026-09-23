@@ -10,6 +10,7 @@ import {
 } from "@/lib/catalog";
 import { formatPriceCents } from "@/lib/format";
 import ProductCard from "@/components/storefront/ProductCard";
+import { AddToCartButton } from "@/components/storefront/cart/AddToCartButton";
 
 /**
  * 商品详情页 /[lang]/products/[slug]
@@ -162,16 +163,20 @@ export default async function ProductPage({
             />
           </div>
 
-          {/* 加入购物车：Phase 4 实现，这里先占位禁用 */}
-          <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            title={dict.productDetail.addToCart}
-            className="mt-6 w-full rounded-full bg-stone-300 text-stone-500 font-semibold py-3 cursor-not-allowed"
-          >
-            {dict.productDetail.addToCart}
-          </button>
+          {/* 加入购物车：Phase 4 已实现（下架商品走 notFound，见上） */}
+          <div className="mt-6">
+            <AddToCartButton
+              product={{
+                productId: product.id,
+                slug: product.slug,
+                nameEn: product.nameEn,
+                nameFr: product.nameFr,
+                priceCents: product.priceCents,
+                isActive: product.isActive,
+              }}
+              locale={locale}
+            />
+          </div>
 
           <h2 className="mt-8 font-bold text-stone-900">
             {dict.productDetail.description}

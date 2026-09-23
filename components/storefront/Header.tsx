@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
+import { CartButton } from "./cart/CartButton";
 
 /**
- * 前台页眉（服务端组件，无 JS 下发）。
+ * 前台页眉（服务端组件；购物车按钮是客户端组件，徽章数字走 CartContext）。
  * 语言切换：Phase 1 切到另一语言的首页；后续阶段会保留当前页面。
  */
 export default function Header({
@@ -66,14 +67,9 @@ export default function Header({
               🔍
             </Link>
 
-            {/* 购物车 / 账户：Phase 4、5 实现，这里先占位 */}
-            <span
-              title={dict.nav.cart}
-              aria-disabled="true"
-              className="p-2 text-stone-500 cursor-not-allowed"
-            >
-              🛒
-            </span>
+            {/* 购物车：Phase 4 已实现，点击打开抽屉 */}
+            <CartButton label={dict.nav.cart} />
+            {/* 账户：Phase 5 实现，这里先占位 */}
             <span
               title={dict.nav.account}
               aria-disabled="true"
