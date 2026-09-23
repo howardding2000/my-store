@@ -137,6 +137,7 @@ async function main() {
     const category = await prisma.category.findUnique({
       where: { slug: p.categorySlug },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { categorySlug, ...data } = p;
     const product = await prisma.product.upsert({
       where: { slug: p.slug },

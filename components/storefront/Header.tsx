@@ -12,7 +12,6 @@ export default function Header({
   dict: Dictionary;
   locale: Locale;
 }) {
-  const otherLocale: Locale = locale === "en" ? "fr" : "en";
   const home = `/${locale}`;
 
   return (
