@@ -8,6 +8,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Screenshots (Chromium 152 headless)
+- Local Network Access checks block CDP `Page.navigate` / iframes to 127.0.0.1 (initiator treated as public page); flags (`--disable-features=LocalNetworkAccessChecks`), `Browser.grantPermissions(localNetworkAccess)`, and `/etc/.../local-network.json` (`LocalNetworkAccessAllowedForUrls`) did NOT unblock it — don't waste time retrying.
+- Working method: temp `public/shot-seed.html` (same origin) that seeds localStorage then `location.replace(to)`; open a `file://` starter page via CDP and set `location.href` to the seed URL from page JS (top-level JS navigation is allowed). Then CDP screenshot as usual. Delete `public/shot-seed.html` and any temp policy files afterwards; keep `screenshots/` untracked (local delivery only).
+- Before full-page screenshots set viewport height = content height, else below-fold content may not rasterize.
+
 ## Project notes (my-store)
 
 - Prisma: `npm i prisma` currently resolves to the v8 RC (new platform CLI, no `migrate`/`generate`). This project pins the stable ORM: `prisma@6` / `@prisma/client@6`.
